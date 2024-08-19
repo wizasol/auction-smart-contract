@@ -23,6 +23,7 @@ pub mod auctionhouse {
         end_time: u64,
         bidder_cap: u64,
         token_amount: u64,
+        spl_token: u8,
     ) -> ProgramResult {
         let auction: &mut Account<OpenAuction> = &mut ctx.accounts.auction;
         let auction_ata = &ctx.accounts.auction_ata;
@@ -80,6 +81,7 @@ pub mod auctionhouse {
         auction.min_bid_increment = increment;
 
         auction.bump = bump;
+        auction.spl_token = spl_token;
 
         create_ata(
             owner.to_account_info(),
@@ -151,6 +153,14 @@ pub mod auctionhouse {
             *bidder.key != auction.owner,
             Err(AuctionError::OwnerCannotBid.into())
         );
+        if auction.spl_token == 0 && token_mint.key() != BOOGA_TOKEN_MINT.parse::<Pubkey>().unwrap()
+        {
+            return Err(AuctionError::InvalidSplToken.into());
+        }
+        if auction.spl_token == 1 && token_mint.key() != ZION_TOKEN_MINT.parse::<Pubkey>().unwrap()
+        {
+            return Err(AuctionError::InvalidSplToken.into());
+        }
 
         let index = auction.bidders.iter().position(|&x| x == *bidder.key);
 
@@ -184,8 +194,8 @@ pub mod auctionhouse {
             auction.bids[index.unwrap()] = total_bid;
         }
 
-        if auction.end_time - cur_time < 1800 {
-            auction.end_time += 1800;
+        if auction.end_time - cur_time < 300 {
+            auction.end_time += 300;
         }
 
         auction.highest_bidder = *bidder.key;

@@ -13,13 +13,13 @@ import { Token, TOKEN_PROGRAM_ID, AccountLayout, MintLayout, ASSOCIATED_TOKEN_PR
 
 import fs from 'fs';
 import { OpenAuction } from './types';
-import { publicKey } from '@project-serum/anchor/dist/cjs/utils';
+import { publicKey, token } from '@project-serum/anchor/dist/cjs/utils';
 import { keccak_256 } from 'js-sha3';
 import * as assert from "assert";
 
 const PROGRAM_ID = "3VwUm7B1u5VDonuwP4NXQVkkkam3NGpAuKanChxkRDAQ";
-const FLWR_TOKEN_MINT = new PublicKey("AsACVnuMa5jpmfp3BjArmb2qWg5A6HBkuXePwT37RrLY");
-const DECIMALS = 100;
+const SPL_TOKEN_MINT = [new PublicKey("AsACVnuMa5jpmfp3BjArmb2qWg5A6HBkuXePwT37RrLY"), new PublicKey("AsACVnuMa5jpmfp3BjArmb2qWg5A6HBkuXePwT37RrLY")];
+const DECIMALS = [100, 1000000000];
 
 anchor.setProvider(anchor.Provider.local(web3.clusterApiUrl('devnet')));
 const solConnection = anchor.getProvider().connection;
@@ -62,7 +62,8 @@ export const CreateOpenAuction = async (
     biddercap: Number,
     startTime: Number,
     endTime: Number,
-    amount: Number
+    amount: Number,
+    splToken: number,
 ) => {
 
     const [auctionAddress, bump] = await PublicKey.findProgramAddress(
@@ -76,8 +77,8 @@ export const CreateOpenAuction = async (
 
     const tx = await program.rpc.createOpenAuction(new anchor.BN(bump),
         auctionTitle,
-        new anchor.BN(floor * DECIMALS),
-        new anchor.BN(increment * DECIMALS),
+        new anchor.BN(floor * DECIMALS[splToken]),
+        new anchor.BN(increment * DECIMALS[1]),
         new anchor.BN(startTime),
         new anchor.BN(endTime),
         new anchor.BN(biddercap),
@@ -123,17 +124,20 @@ export const MakeOpenBid = async (
     auctionAddress: PublicKey,
     amount: number
 ) => {
-    let auctionAta = await getAssociatedTokenAccount(auctionAddress, FLWR_TOKEN_MINT);
-    let bidderAta = await getAssociatedTokenAccount(bidder, FLWR_TOKEN_MINT);
+    let auctionState = await getOpenAuctionState(auctionAddress);
+    let tokenMint = auctionState.splToken.toNumber();
+
+    let auctionAta = await getAssociatedTokenAccount(auctionAddress, SPL_TOKEN_MINT[tokenMint]);
+    let bidderAta = await getAssociatedTokenAccount(bidder, SPL_TOKEN_MINT[tokenMint]);
 
     const tx = await program.rpc.makeOpenBid(
-        new anchor.BN(amount * DECIMALS), {
+        new anchor.BN(amount * DECIMALS[tokenMint]), {
         accounts: {
             auction: auctionAddress,
             auctionAta: auctionAta,
             bidder,
             bidderAta,
-            tokenMint: FLWR_TOKEN_MINT,
+            tokenMint: SPL_TOKEN_MINT[tokenMint],
             systemProgram: SystemProgram.programId,
             tokenProgram: TOKEN_PROGRAM_ID,
             ataProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -150,8 +154,11 @@ export const ReclaimOpenBid = async (
     bidder: PublicKey,
     auctionAddress: PublicKey,
 ) => {
-    let auctionAta = await getAssociatedTokenAccount(auctionAddress, FLWR_TOKEN_MINT);
-    let bidderAta = await getAssociatedTokenAccount(bidder, FLWR_TOKEN_MINT);
+    let auctionState = await getOpenAuctionState(auctionAddress);
+    let tokenMint = auctionState.splToken.toNumber();
+
+    let auctionAta = await getAssociatedTokenAccount(auctionAddress, SPL_TOKEN_MINT[tokenMint]);
+    let bidderAta = await getAssociatedTokenAccount(bidder, SPL_TOKEN_MINT[tokenMint]);
 
     const tx = await program.rpc.reclaimOpenBid({
         accounts: {
@@ -200,8 +207,11 @@ export const WithdrawWinningBidOpen = async (
     owner: PublicKey,
     auctionAddress: PublicKey,
 ) => {
-    let auctionAta = await getAssociatedTokenAccount(auctionAddress, FLWR_TOKEN_MINT);
-    let ownerAta = await getAssociatedTokenAccount(owner, FLWR_TOKEN_MINT);
+    let auctionState = await getOpenAuctionState(auctionAddress);
+    let tokenMint = auctionState.splToken.toNumber();
+
+    let auctionAta = await getAssociatedTokenAccount(auctionAddress, SPL_TOKEN_MINT[tokenMint]);
+    let ownerAta = await getAssociatedTokenAccount(owner, SPL_TOKEN_MINT[tokenMint]);
 
     const tx = await program.rpc.withdrawWinningBidOpen({
         accounts: {
@@ -262,7 +272,7 @@ export const getAuctionKey = async (
         {
             filters: [
                 {
-                    dataSize: 366 + 8 + 40 * bidderCap
+                    dataSize: 367 + 8 + 40 * bidderCap
                 },
                 {
                     memcmp: {

@@ -23,34 +23,6 @@ export interface OpenAuction {
     minBidIncrement: anchor.BN,
 
     bump: anchor.BN,
+    splToken: anchor.BN,
 }
 
-export interface SealedAuction {
-    firstPrice: Boolean,
-
-    owner: PublicKey,
-    mint: PublicKey,
-    tokenAmount: anchor.BN,
-
-    startTime: anchor.BN,
-    endTime: anchor.BN,
-    revealPeriod: anchor.BN,
-    cancelled: Boolean,
-
-    title: String,
-
-    bidderCap: anchor.BN,
-    bidders: PublicKey[],
-    sealedBids: Uint8Array[],
-
-    fakeBids: anchor.BN[],
-
-    highestBidder: PublicKey,
-    highestBid: anchor.BN,
-    secondHighestBid: anchor.BN,
-
-    bidFloor: anchor.BN,
-    winningBidWithdrawn: Boolean,
-
-    bump: anchor.BN
-}

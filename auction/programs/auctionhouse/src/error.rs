@@ -12,8 +12,8 @@ pub enum AuctionError {
     InvalidEndTime,
     #[msg("Bid floor must be at least 1 lamport.")]
     InvalidBidFloor,
-    #[msg("Reveal period must end after the auction ends.")]
-    InvalidRevealPeriod,
+    #[msg("Invaild SPL token address.")]
+    InvalidSplToken,
     #[msg("SPL token amount must be greater than 0.")]
     InvalidTokenAmount,
     #[msg("Must bid higher than the floor.")]

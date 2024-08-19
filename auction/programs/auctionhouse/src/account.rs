@@ -23,6 +23,7 @@ pub struct OpenAuction {
     pub min_bid_increment: u64,
 
     pub bump: u8,
+    pub spl_token: u8,
 }
 
 pub const DISCRIMINATOR_LENGTH: usize = 8;
@@ -49,5 +50,6 @@ impl OpenAuction {
         + U64_LENGTH // highest bid
         + U64_LENGTH // bid floor
         + U64_LENGTH // min bid increment
-        + U8_LENGTH; // bump
+        + U8_LENGTH  // bump
+        + U8_LENGTH; // spl_token
 }
