@@ -1,21 +1,6 @@
 # auction-smart-contract
 This is the auction project that users made their bids and the highest bidder(winner) will be receive the NFT.
 
-## Install Dependencies
-- Install `node` and `yarn`
-- Install `ts-node` as global command
-- Confirm the solana wallet preparation: `/home/fury/.config/solana/id.json` in test case
-
-## Usage
-- Main script source for all functionality is here: `/cli/script.ts`
-- Program account types are declared here: `/cli/types.ts`
-- Idl to make the JS binding easy is here: `/cli/raffle.json`
-
-Able to test the script functions working in this way.
-- Change commands properly in the main functions of the `script.ts` file to call the other functions
-- Confirm the `ANCHOR_WALLET` environment variable of the `ts-node` script in `package.json`
-- Run `yarn ts-node`
-
 ## Features
 
 ### - As the Creator of Auction
@@ -61,3 +46,18 @@ Winners can receive the NFT from the PDA.
 ```js
 pub fn withdraw_item_open(ctx: Context<WithdrawItemOpen>)
 ```
+
+## Install Dependencies
+- Install `node` and `yarn`
+- Install `ts-node` as global command
+- Confirm the solana wallet preparation: `/home/fury/.config/solana/id.json` in test case
+
+## Usage
+- Main script source for all functionality is here: `/cli/script.ts`
+- Program account types are declared here: `/cli/types.ts`
+- Idl to make the JS binding easy is here: `/cli/raffle.json`
+
+Able to test the script functions working in this way.
+- Change commands properly in the main functions of the `script.ts` file to call the other functions
+- Confirm the `ANCHOR_WALLET` environment variable of the `ts-node` script in `package.json`
+- Run `yarn ts-node`
