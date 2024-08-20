@@ -1,4 +1,4 @@
-# auction-pro-contract
+# auction-smart-contract
 This is the auction project that users made their bids and the highest bidder(winner) will be receive the NFT.
 
 ## Install Dependencies
